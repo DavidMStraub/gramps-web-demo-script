@@ -20,3 +20,7 @@ docker-compose run grampsweb bash -c 'python3 -c "import secrets;print(secrets.t
 
 # recreate search index
 docker-compose run grampsweb python3 -m gramps_webapi  --config /app/config/config.cfg search index-full
+
+# update image
+docker-compose pull grampsweb
+docker-compose up -d
