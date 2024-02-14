@@ -3,6 +3,8 @@
 # switch to docker-compose folder
 cd /opt/grampsweb
 
+docker-compose down
+
 # delete all data
 docker-compose run grampsweb bash -c 'rm -rf /app/indexdir/* && rm -rf /app/thumbnail_cache/* && rm -rf /app/users/* && rm -rf /app/media/*'
 
