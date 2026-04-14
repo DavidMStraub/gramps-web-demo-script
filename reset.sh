@@ -5,6 +5,11 @@ cd /opt/grampsweb
 
 docker-compose down
 
+# update images
+docker-compose pull grampsweb
+docker-compose pull nginx-proxy acme-companion redis || true
+docker system prune -f
+
 # delete all data
 docker-compose run --rm --entrypoint="" grampsweb bash -c 'rm -rf /app/indexdir/* && rm -rf /app/thumbnail_cache/* && rm -rf /app/users/* && rm -rf /app/media/*'
 
@@ -23,7 +28,4 @@ docker-compose run --rm grampsweb python3 -m gramps_webapi --config /app/config/
 # create user accounts
 docker-compose run --rm grampsweb bash -c 'python3 -m gramps_webapi --config /app/config/config.cfg user add owner owner --fullname Owner --role 4 && python3 -m gramps_webapi  --config /app/config/config.cfg user add editor editor --fullname Editor --role 3 && python3 -m gramps_webapi  --config /app/config/config.cfg user add contributor contributor --fullname Contributor --role 2 && python3 -m gramps_webapi  --config /app/config/config.cfg user add member member --fullname Member --role 1'
 
-# update image and remove old/unused images and stopped containers
-docker-compose pull grampsweb
-docker system prune -f
 docker-compose up -d
