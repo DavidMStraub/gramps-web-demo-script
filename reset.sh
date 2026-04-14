@@ -1,14 +1,15 @@
 #!/bin/bash
+set -e
 
 # switch to docker-compose folder
 cd /opt/grampsweb
 
 docker-compose down
 
-# update images
-docker-compose pull grampsweb
-docker-compose pull nginx-proxy acme-companion redis || true
+# free up disk space before pulling, then pull updated images
+journalctl --vacuum-size=50M
 docker system prune -f
+docker-compose pull
 
 # delete all data
 docker-compose run --rm --entrypoint="" grampsweb bash -c 'rm -rf /app/indexdir/* && rm -rf /app/thumbnail_cache/* && rm -rf /app/users/* && rm -rf /app/media/*'
