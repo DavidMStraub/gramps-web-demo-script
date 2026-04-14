@@ -4,7 +4,7 @@ set -e
 # switch to docker-compose folder
 cd /opt/grampsweb
 
-docker-compose down
+docker-compose down --rmi all
 
 # free up disk space before pulling, then pull updated images
 journalctl --vacuum-size=50M
