@@ -18,10 +18,10 @@ docker-compose run --rm --entrypoint="" grampsweb bash -c 'rm -rf /app/indexdir/
 docker-compose run --rm --entrypoint="" grampsweb bash -c 'python3 -c "import secrets;print(secrets.token_urlsafe(32))"  | tr -d "\n" > /app/secret/secret'
 
 # copy media files of example.gramps
-docker-compose run --rm --entrypoint="" grampsweb cp -a /usr/local/share/doc/gramps/example/gramps/. /app/media/
+docker-compose run --rm --entrypoint="" grampsweb cp -a /venv/share/doc/gramps/example/gramps/. /app/media/
 
 # import Gramps example database
-docker-compose run --rm --entrypoint="" grampsweb bash -c 'cp -r /usr/local/share/doc/gramps/example/gramps/example.gramps /app && rm -rf /root/.gramps/grampsdb/* && gramps -C Gramps\ Web -i example.gramps --config=database.backend:sqlite --config=database.path:/root/.gramps/grampsdb'
+docker-compose run --rm --entrypoint="" grampsweb bash -c 'cp -r /venv/share/doc/gramps/example/gramps/example.gramps /app && rm -rf /root/.gramps/grampsdb/* && gramps -C Gramps\ Web -i example.gramps --config=database.backend:sqlite --config=database.path:/root/.gramps/grampsdb'
 
 # recreate search index
 docker-compose run --rm grampsweb python3 -m gramps_webapi --config /app/config/config.cfg search index-full
