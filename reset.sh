@@ -17,11 +17,27 @@ docker-compose run --rm --entrypoint="" grampsweb bash -c 'rm -rf /app/indexdir/
 # create new secret token (requires users to log in again)
 docker-compose run --rm --entrypoint="" grampsweb bash -c 'python3 -c "import secrets;print(secrets.token_urlsafe(32))"  | tr -d "\n" > /app/secret/secret'
 
-# copy media files of example.gramps
-docker-compose run --rm --entrypoint="" grampsweb cp -a /venv/share/doc/gramps/example/gramps/. /app/media/
+# update cached queen example tree archive (fall back to existing cache on failure)
+TREE_ARCHIVE=/opt/grampsweb/queen-tree.tar.gz
+if curl -fsSL https://github.com/DavidMStraub/gramps-web-example-tree-queen/archive/refs/heads/main.tar.gz \
+    -o "${TREE_ARCHIVE}.tmp"; then
+  mv "${TREE_ARCHIVE}.tmp" "$TREE_ARCHIVE"
+else
+  echo "Warning: download failed, using cached archive"
+  rm -f "${TREE_ARCHIVE}.tmp"
+fi
 
-# import Gramps example database
-docker-compose run --rm --entrypoint="" grampsweb bash -c 'cp -r /venv/share/doc/gramps/example/gramps/example.gramps /app && rm -rf /root/.gramps/grampsdb/* && gramps -C Gramps\ Web -i example.gramps --config=database.backend:sqlite --config=database.path:/root/.gramps/grampsdb'
+# import queen example tree
+docker-compose run --rm --entrypoint="" \
+  -v "${TREE_ARCHIVE}:/tmp/queen-tree.tar.gz:ro" \
+  grampsweb bash -c '
+    tar xz -C /tmp -f /tmp/queen-tree.tar.gz &&
+    cp -a /tmp/gramps-web-example-tree-queen-main/media/. /app/media/ &&
+    rm -rf /root/.gramps/grampsdb/* &&
+    gramps -C Gramps\ Web -i /tmp/gramps-web-example-tree-queen-main/queen.gramps \
+      --config=database.backend:sqlite \
+      --config=database.path:/root/.gramps/grampsdb
+  '
 
 # recreate search index
 docker-compose run --rm grampsweb python3 -m gramps_webapi --config /app/config/config.cfg search index-full
